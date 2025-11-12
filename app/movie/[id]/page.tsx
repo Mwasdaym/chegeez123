@@ -5,8 +5,17 @@ import { useParams, useRouter } from "next/navigation"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { Spinner } from "@/components/spinner"
+import StreamSelector from "@/components/stream-selector"
+import QualitySelector from "@/components/quality-selector"
+import TranslationSelector from "@/components/translation-selector"
 import { Download, Share2, Heart } from "lucide-react"
 import Image from "next/image"
+
+interface StreamServer {
+  id: string
+  name: string
+  url: string
+}
 
 export default function MovieDetailPage() {
   const params = useParams()
@@ -16,7 +25,16 @@ export default function MovieDetailPage() {
   const [sources, setSources] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedQuality, setSelectedQuality] = useState("720p")
+  const [selectedLanguage, setSelectedLanguage] = useState("en")
+  const [selectedServer, setSelectedServer] = useState<StreamServer | null>(null)
   const [isFavorite, setIsFavorite] = useState(false)
+
+  const streamServers: StreamServer[] = [
+    { id: "server1", name: "Server 1", url: "https://stream1.example.com" },
+    { id: "server2", name: "Server 2", url: "https://stream2.example.com" },
+    { id: "server3", name: "Server 3", url: "https://stream3.example.com" },
+    { id: "server4", name: "Server 4", url: "https://stream4.example.com" },
+  ]
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
@@ -48,8 +66,12 @@ export default function MovieDetailPage() {
       }
     }
 
+    if (!selectedServer && streamServers.length > 0) {
+      setSelectedServer(streamServers[0])
+    }
+
     fetchMovieDetails()
-  }, [id])
+  }, [id, selectedServer])
 
   const handleAddToWatchlist = () => {
     const watchlist = JSON.parse(localStorage.getItem("watchlist") || "[]")
@@ -88,6 +110,10 @@ export default function MovieDetailPage() {
   }
 
   const selectedSource = sources.find((s) => s.quality === selectedQuality)
+  const qualityOptions = sources.map((s) => ({
+    quality: s.quality,
+    size: s.size ? `${(Number.parseInt(s.size) / 1024 / 1024 / 1024).toFixed(2)} GB` : "Unknown",
+  }))
 
   return (
     <div className="min-h-screen bg-background">
@@ -179,28 +205,43 @@ export default function MovieDetailPage() {
               </div>
             )}
 
-            {/* Video Player & Download */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-bold text-foreground">Watch Now</h2>
+            {/* Video Player Controls */}
+            <div className="space-y-6 bg-card p-6 rounded-lg border border-border">
+              <h2 className="text-2xl font-bold text-foreground">Watch Now</h2>
 
-              {/* Quality Selection */}
-              {sources.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {sources.map((source) => (
-                    <button
-                      key={source.id}
-                      onClick={() => setSelectedQuality(source.quality)}
-                      className={`px-4 py-2 rounded font-semibold transition ${
-                        selectedQuality === source.quality
-                          ? "bg-accent text-accent-foreground"
-                          : "bg-card text-foreground hover:bg-card/80"
-                      }`}
-                    >
-                      {source.quality}
-                    </button>
-                  ))}
+              <div className="space-y-4">
+                {/* Stream Server Selection */}
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-foreground">Select Stream Server</label>
+                  <StreamSelector
+                    servers={streamServers}
+                    selectedServer={selectedServer}
+                    onServerChange={(server) => setSelectedServer(server)}
+                  />
                 </div>
-              )}
+
+                {/* Quality Selection */}
+                {qualityOptions.length > 0 && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-foreground">Video Quality</label>
+                    <QualitySelector
+                      qualities={qualityOptions}
+                      selectedQuality={selectedQuality}
+                      onQualityChange={setSelectedQuality}
+                    />
+                  </div>
+                )}
+
+                {/* Language/Translation Selection */}
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-foreground">Audio Language</label>
+                  <TranslationSelector
+                    languages={[]}
+                    selectedLanguage={selectedLanguage}
+                    onLanguageChange={setSelectedLanguage}
+                  />
+                </div>
+              </div>
 
               {/* Download Button */}
               {selectedSource && (
@@ -209,7 +250,7 @@ export default function MovieDetailPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   download
-                  className="inline-flex items-center gap-2 bg-accent text-accent-foreground px-6 py-3 rounded-lg font-bold hover:bg-accent/90 transition"
+                  className="inline-flex items-center gap-2 bg-accent text-accent-foreground px-6 py-3 rounded-lg font-bold hover:bg-accent/90 transition w-full justify-center"
                 >
                   <Download className="w-5 h-5" />
                   Download {selectedSource.quality} (

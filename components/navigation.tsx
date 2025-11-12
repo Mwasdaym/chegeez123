@@ -11,9 +11,8 @@ export default function Navigation() {
     <nav className="sticky top-0 z-50 bg-gradient-to-b from-black/80 to-transparent backdrop-blur-md border-b border-border">
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
         <div className="flex items-center justify-between gap-4">
-          {/* Logo */}
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <div className="text-2xl font-bold text-accent">🎬 MovieBox</div>
+            <div className="text-2xl font-bold text-accent">🎬 UNLIMITED STREAM</div>
           </Link>
 
           {/* Desktop Navigation */}
