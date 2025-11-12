@@ -5,12 +5,18 @@ import { useParams, useRouter } from "next/navigation"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { Spinner } from "@/components/spinner"
-import StreamSelector from "@/components/stream-selector"
-import QualitySelector from "@/components/quality-selector"
-import TranslationSelector from "@/components/translation-selector"
+import VideoPlayer from "@/components/video-player"
 import TrailerModal from "@/components/trailer-modal"
 import { Download, Share2, Heart, Play, List, Film } from "lucide-react"
 import Image from "next/image"
+
+interface MovieSource {
+  id: string
+  quality: string
+  download_url: string
+  size: string
+  format: string
+}
 
 interface StreamServer {
   id: string
@@ -23,7 +29,7 @@ export default function MovieDetailPage() {
   const id = params.id as string
   const router = useRouter()
   const [movie, setMovie] = useState<any>(null)
-  const [sources, setSources] = useState<any[]>([])
+  const [sources, setSources] = useState<MovieSource[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedQuality, setSelectedQuality] = useState("720p")
   const [selectedLanguage, setSelectedLanguage] = useState("en")
@@ -55,16 +61,24 @@ export default function MovieDetailPage() {
           setMovie(infoData.results.subject)
         }
         if (sourcesData.results) {
-          setSources(sourcesData.results)
-          const quality720p = sourcesData.results.find((s: any) => s.quality === "720p")
+          const parsedSources = sourcesData.results.map((source: any) => ({
+            id: source.id,
+            quality: source.quality,
+            download_url: decodeURIComponent(source.download_url),
+            size: source.size,
+            format: source.format,
+          }))
+          setSources(parsedSources)
+
+          const quality720p = parsedSources.find((s: MovieSource) => s.quality === "720p")
           if (quality720p) {
             setSelectedQuality("720p")
-          } else if (sourcesData.results.length > 0) {
-            setSelectedQuality(sourcesData.results[0].quality)
+          } else if (parsedSources.length > 0) {
+            setSelectedQuality(parsedSources[0].quality)
           }
         }
       } catch (error) {
-        console.error("Failed to fetch movie details:", error)
+        console.error("[v0] Failed to fetch movie details:", error)
       } finally {
         setLoading(false)
       }
@@ -128,37 +142,14 @@ export default function MovieDetailPage() {
         movieId={movie?.subjectId || ""}
       />
 
-      {showPlayer && (
-        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4">
-          <div className="w-full max-w-4xl">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-foreground">{movie.title}</h2>
-              <button
-                onClick={() => setShowPlayer(false)}
-                className="text-3xl text-foreground hover:text-accent transition"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="relative bg-black rounded-lg overflow-hidden aspect-video flex items-center justify-center">
-              <div className="text-center space-y-4">
-                <p className="text-lg text-foreground">Now Playing: {selectedServer?.name}</p>
-                <p className="text-sm text-muted-foreground">Quality: {selectedQuality}</p>
-                <p className="text-sm text-muted-foreground">Language: {selectedLanguage}</p>
-                <div className="pt-4">
-                  <a
-                    href={selectedSource?.download_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block bg-accent hover:bg-accent/90 text-accent-foreground px-6 py-3 rounded-lg font-bold transition"
-                  >
-                    Open Stream
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      {showPlayer && selectedSource && (
+        <VideoPlayer
+          streamUrl={selectedSource.download_url}
+          movieTitle={movie.title}
+          quality={selectedQuality}
+          language={selectedLanguage}
+          onClose={() => setShowPlayer(false)}
+        />
       )}
 
       <Navigation />
@@ -257,33 +248,64 @@ export default function MovieDetailPage() {
                 {/* Stream Server Selection */}
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-foreground">Select Stream Server</label>
-                  <StreamSelector
-                    servers={streamServers}
-                    selectedServer={selectedServer}
-                    onServerChange={(server) => setSelectedServer(server)}
-                  />
+                  <div className="flex flex-wrap gap-2">
+                    {streamServers.map((server) => (
+                      <button
+                        key={server.id}
+                        onClick={() => setSelectedServer(server)}
+                        className={`px-4 py-2 rounded-lg font-semibold transition ${
+                          selectedServer?.id === server.id
+                            ? "bg-accent text-accent-foreground"
+                            : "bg-background hover:bg-background/80 text-foreground border border-border"
+                        }`}
+                      >
+                        {server.name}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Quality Selection */}
                 {qualityOptions.length > 0 && (
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-foreground">Video Quality</label>
-                    <QualitySelector
-                      qualities={qualityOptions}
-                      selectedQuality={selectedQuality}
-                      onQualityChange={setSelectedQuality}
-                    />
+                    <div className="flex flex-wrap gap-2">
+                      {qualityOptions.map((option) => (
+                        <button
+                          key={option.quality}
+                          onClick={() => setSelectedQuality(option.quality)}
+                          className={`px-4 py-2 rounded-lg font-semibold transition ${
+                            selectedQuality === option.quality
+                              ? "bg-accent text-accent-foreground"
+                              : "bg-background hover:bg-background/80 text-foreground border border-border"
+                          }`}
+                        >
+                          {option.quality}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
 
                 {/* Language/Translation Selection */}
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-foreground">Audio Language</label>
-                  <TranslationSelector
-                    languages={[]}
-                    selectedLanguage={selectedLanguage}
-                    onLanguageChange={setSelectedLanguage}
-                  />
+                  <select
+                    value={selectedLanguage}
+                    onChange={(e) => setSelectedLanguage(e.target.value)}
+                    className="w-full px-4 py-2 bg-background text-foreground rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-accent"
+                  >
+                    <option value="en">English</option>
+                    <option value="es">Spanish</option>
+                    <option value="fr">French</option>
+                    <option value="de">German</option>
+                    <option value="ja">Japanese</option>
+                    <option value="ko">Korean</option>
+                    <option value="zh">Chinese</option>
+                    <option value="ar">Arabic</option>
+                    <option value="pt">Portuguese</option>
+                    <option value="ru">Russian</option>
+                  </select>
                 </div>
               </div>
 
@@ -293,7 +315,6 @@ export default function MovieDetailPage() {
                   href={selectedSource.download_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  download
                   className="inline-flex items-center gap-2 bg-accent text-accent-foreground px-6 py-3 rounded-lg font-bold hover:bg-accent/90 transition w-full justify-center"
                 >
                   <Download className="w-5 h-5" />
