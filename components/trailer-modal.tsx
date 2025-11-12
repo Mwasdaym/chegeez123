@@ -15,6 +15,7 @@ export default function TrailerModal({ isOpen, onClose, movieTitle, movieId }: T
   const [trailerUrl, setTrailerUrl] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [tryingAlternative, setTryingAlternative] = useState(false)
 
   useEffect(() => {
     const fetchTrailer = async () => {
@@ -22,9 +23,10 @@ export default function TrailerModal({ isOpen, onClose, movieTitle, movieId }: T
 
       setLoading(true)
       setError("")
+      setTryingAlternative(false)
 
       try {
-        console.log("[v0] Fetching trailer for movie ID:", movieId)
+        console.log("[v0] Attempting to fetch trailer for movie ID:", movieId)
 
         const response = await fetch(`https://movieapi.giftedtech.co.ke/api/trailer/${movieId}`)
         const data = await response.json()
@@ -34,12 +36,20 @@ export default function TrailerModal({ isOpen, onClose, movieTitle, movieId }: T
         if (data.results?.download_url) {
           const trailerVideoUrl = decodeURIComponent(data.results.download_url)
           setTrailerUrl(trailerVideoUrl)
+        } else if (data.results && typeof data.results === "object" && "url" in data.results) {
+          const url = (data.results as any).url || (data.results as any).trailer_url
+          if (url) {
+            const trailerVideoUrl = typeof url === "string" ? decodeURIComponent(url) : url
+            setTrailerUrl(trailerVideoUrl)
+          } else {
+            setError("Trailer not currently available. Check back soon!")
+          }
         } else {
-          setError("Trailer not available for this movie")
+          setError("Trailer not currently available. Check back soon!")
         }
       } catch (err) {
         console.error("[v0] Failed to fetch trailer:", err)
-        setError("Failed to load trailer")
+        setError("Unable to load trailer at this time.")
       } finally {
         setLoading(false)
       }
@@ -76,11 +86,19 @@ export default function TrailerModal({ isOpen, onClose, movieTitle, movieId }: T
         )}
 
         {error && (
-          <div
-            className="relative w-full bg-black p-8 flex items-center justify-center"
-            style={{ paddingBottom: "56.25%" }}
-          >
-            <p className="text-accent text-center">{error}</p>
+          <div className="relative w-full bg-black p-8 flex items-center justify-center min-h-96">
+            <div className="text-center space-y-4">
+              <p className="text-accent text-lg">{error}</p>
+              <p className="text-muted-foreground text-sm">
+                This movie's trailer may not be available yet in our library.
+              </p>
+              <button
+                onClick={onClose}
+                className="mt-4 bg-accent text-accent-foreground px-6 py-2 rounded-lg font-bold hover:bg-accent/90 transition"
+              >
+                Close
+              </button>
+            </div>
           </div>
         )}
 
