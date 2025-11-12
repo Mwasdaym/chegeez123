@@ -2,6 +2,7 @@
 
 import { X } from "lucide-react"
 import { useState, useEffect } from "react"
+import { Spinner } from "./spinner"
 
 interface TrailerModalProps {
   isOpen: boolean
@@ -12,12 +13,39 @@ interface TrailerModalProps {
 
 export default function TrailerModal({ isOpen, onClose, movieTitle, movieId }: TrailerModalProps) {
   const [trailerUrl, setTrailerUrl] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
   useEffect(() => {
-    if (isOpen) {
-      // Construct trailer URL using YouTube embed
-      setTrailerUrl(`https://www.youtube.com/embed/${movieId}?autoplay=1`)
+    const fetchTrailer = async () => {
+      if (!isOpen) return
+
+      setLoading(true)
+      setError("")
+
+      try {
+        console.log("[v0] Fetching trailer for movie ID:", movieId)
+
+        const response = await fetch(`https://movieapi.giftedtech.co.ke/api/trailer/${movieId}`)
+        const data = await response.json()
+
+        console.log("[v0] Trailer response:", data)
+
+        if (data.results?.download_url) {
+          const trailerVideoUrl = decodeURIComponent(data.results.download_url)
+          setTrailerUrl(trailerVideoUrl)
+        } else {
+          setError("Trailer not available for this movie")
+        }
+      } catch (err) {
+        console.error("[v0] Failed to fetch trailer:", err)
+        setError("Failed to load trailer")
+      } finally {
+        setLoading(false)
+      }
     }
+
+    fetchTrailer()
   }, [isOpen, movieId])
 
   if (!isOpen) return null
@@ -38,16 +66,32 @@ export default function TrailerModal({ isOpen, onClose, movieTitle, movieId }: T
         </div>
 
         {/* Video Container */}
-        <div className="relative w-full bg-black" style={{ paddingBottom: "56.25%" }}>
-          <iframe
-            className="absolute inset-0 w-full h-full"
-            src={trailerUrl}
-            title={`${movieTitle} Trailer`}
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        </div>
+        {loading && (
+          <div
+            className="relative w-full bg-black flex items-center justify-center"
+            style={{ paddingBottom: "56.25%" }}
+          >
+            <Spinner />
+          </div>
+        )}
+
+        {error && (
+          <div
+            className="relative w-full bg-black p-8 flex items-center justify-center"
+            style={{ paddingBottom: "56.25%" }}
+          >
+            <p className="text-accent text-center">{error}</p>
+          </div>
+        )}
+
+        {trailerUrl && !loading && (
+          <div className="relative w-full bg-black" style={{ paddingBottom: "56.25%" }}>
+            <video className="absolute inset-0 w-full h-full" controls autoPlay controlsList="nodownload">
+              <source src={trailerUrl} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        )}
       </div>
     </div>
   )
