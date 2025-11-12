@@ -49,11 +49,50 @@ export default function VideoPlayer({ streamUrl, movieTitle, quality, language, 
     if (!video) return
 
     const handleLoadStart = () => setIsLoading(true)
-    const handleCanPlay = () => setIsLoading(false)
+    const handleCanPlay = () => {
+      setIsLoading(false)
+      setError(null)
+    }
     const handleError = () => {
       setIsLoading(false)
-      setError("Failed to load video. The stream may be temporarily unavailable.")
+      console.log("[v0] Video error - Code:", video.error?.code, "Message:", video.error?.message)
+      setError("Failed to load video. The stream may be temporarily unavailable. Try another quality.")
     }
+    const handleLoadedMetadata = () => {
+      console.log("[v0] Video metadata loaded successfully")
+    }
+
+    video.addEventListener("loadstart", handleLoadStart)
+    video.addEventListener("canplay", handleCanPlay)
+    video.addEventListener("error", handleError)
+    video.addEventListener("loadedmetadata", handleLoadedMetadata)
+
+    return () => {
+      video.removeEventListener("loadstart", handleLoadStart)
+      video.removeEventListener("canplay", handleCanPlay)
+      video.removeEventListener("error", handleError)
+      video.removeEventListener("loadedmetadata", handleLoadedMetadata)
+    }
+  }, [selectedCaption, captions])
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video || !streamUrl) return
+
+    console.log("[v0] Loading video URL:", streamUrl.substring(0, 80) + "...")
+
+    // Reset error when URL changes
+    setError(null)
+    setIsLoading(true)
+
+    // Attempt to load the video
+    video.src = streamUrl
+    video.load()
+  }, [streamUrl])
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
 
     const handleTimeUpdate = () => {
       if (!selectedCaption || captions.length === 0) {
@@ -66,15 +105,9 @@ export default function VideoPlayer({ streamUrl, movieTitle, quality, language, 
       setCurrentCaption(activeCaption?.text || "")
     }
 
-    video.addEventListener("loadstart", handleLoadStart)
-    video.addEventListener("canplay", handleCanPlay)
-    video.addEventListener("error", handleError)
     video.addEventListener("timeupdate", handleTimeUpdate)
 
     return () => {
-      video.removeEventListener("loadstart", handleLoadStart)
-      video.removeEventListener("canplay", handleCanPlay)
-      video.removeEventListener("error", handleError)
       video.removeEventListener("timeupdate", handleTimeUpdate)
     }
   }, [selectedCaption, captions])

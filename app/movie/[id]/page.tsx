@@ -46,21 +46,41 @@ export default function MovieDetailPage() {
         if (infoData.results?.subject) {
           setMovie(infoData.results.subject)
         }
+
         if (sourcesData.results) {
-          const parsedSources = sourcesData.results.map((source: any) => ({
-            id: source.id,
-            quality: source.quality,
-            download_url: decodeURIComponent(source.download_url),
-            size: source.size,
-            format: source.format,
-          }))
+          const parsedSources = sourcesData.results.map((source: any) => {
+            let decodedUrl = source.download_url
+            try {
+              decodedUrl = decodeURIComponent(source.download_url)
+            } catch (e) {
+              console.log("[v0] URL decode error:", e)
+            }
+
+            return {
+              id: source.id,
+              quality: source.quality || "Unknown",
+              download_url: decodedUrl,
+              size: source.size || "Unknown",
+              format: source.format || "mp4",
+            }
+          })
+
+          console.log(
+            "[v0] Available sources:",
+            parsedSources.map((s) => ({ quality: s.quality, url: s.download_url.substring(0, 60) })),
+          )
           setSources(parsedSources)
 
           const quality720p = parsedSources.find((s: any) => s.quality === "720p")
+          const quality480p = parsedSources.find((s: any) => s.quality === "480p")
+          const anyQuality = parsedSources.length > 0 ? parsedSources[0] : null
+
           if (quality720p) {
             setSelectedQuality("720p")
-          } else if (parsedSources.length > 0) {
-            setSelectedQuality(parsedSources[0].quality)
+          } else if (quality480p) {
+            setSelectedQuality("480p")
+          } else if (anyQuality) {
+            setSelectedQuality(anyQuality.quality)
           }
         }
       } catch (error) {
