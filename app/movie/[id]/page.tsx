@@ -8,7 +8,8 @@ import { Spinner } from "@/components/spinner"
 import StreamSelector from "@/components/stream-selector"
 import QualitySelector from "@/components/quality-selector"
 import TranslationSelector from "@/components/translation-selector"
-import { Download, Share2, Heart, Play, List } from "lucide-react"
+import TrailerModal from "@/components/trailer-modal"
+import { Download, Share2, Heart, Play, List, Film } from "lucide-react"
 import Image from "next/image"
 
 interface StreamServer {
@@ -29,6 +30,7 @@ export default function MovieDetailPage() {
   const [selectedServer, setSelectedServer] = useState<StreamServer | null>(null)
   const [isFavorite, setIsFavorite] = useState(false)
   const [showEpisodes, setShowEpisodes] = useState(false)
+  const [showTrailer, setShowTrailer] = useState(false)
 
   const streamServers: StreamServer[] = [
     { id: "server1", name: "Server 1", url: "https://stream1.example.com" },
@@ -118,6 +120,13 @@ export default function MovieDetailPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <TrailerModal
+        isOpen={showTrailer}
+        onClose={() => setShowTrailer(false)}
+        movieTitle={movie?.title || "Movie"}
+        movieId={movie?.subjectId || ""}
+      />
+
       <Navigation />
 
       {/* Hero Section */}
@@ -274,6 +283,13 @@ export default function MovieDetailPage() {
               <button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition">
                 <Play className="w-5 h-5" fill="currentColor" />
                 Watch Now
+              </button>
+              <button
+                onClick={() => setShowTrailer(true)}
+                className="w-full bg-card hover:bg-card/80 text-foreground font-bold py-3 px-4 rounded-lg border border-border flex items-center justify-center gap-2 transition"
+              >
+                <Film className="w-5 h-5" />
+                Trailer
               </button>
               <button
                 onClick={() => setShowEpisodes(!showEpisodes)}
