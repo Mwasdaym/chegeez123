@@ -1,0 +1,8 @@
+export function Spinner() {
+  return (
+    <div className="flex flex-col items-center justify-center gap-4">
+      <div className="w-12 h-12 border-4 border-border border-t-accent rounded-full animate-spin" />
+      <p className="text-muted-foreground">Loading...</p>
+    </div>
+  )
+}
