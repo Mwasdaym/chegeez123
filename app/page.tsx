@@ -20,12 +20,20 @@ interface Movie {
 
 const MOVIE_API = "https://movieapi.giftedtech.co.ke"
 
-async function fetchMovies(endpoint: string): Promise<Movie[]> {
+async function fetchMovies(query: string): Promise<Movie[]> {
   try {
-    const response = await fetch(`${MOVIE_API}${endpoint}`)
+    const response = await fetch(`${MOVIE_API}/api/search/${encodeURIComponent(query)}`)
     if (!response.ok) throw new Error("Failed to fetch")
     const data = await response.json()
-    return data.data || data || []
+    const items = data.results?.items || data.items || []
+    return items.map((movie: any) => ({
+      id: movie.subjectId,
+      subjectId: movie.subjectId,
+      title: movie.title,
+      cover: movie.cover,
+      imdbRatingValue: movie.imdbRatingValue,
+      releaseDate: movie.releaseDate,
+    }))
   } catch (error) {
     console.error("[v0] Error fetching from Movie API:", error)
     return []
@@ -44,9 +52,9 @@ export default function Home() {
       try {
         console.log("[v0] Fetching movies from Movie API...")
         const [trending, popular, newReleases] = await Promise.all([
-          fetchMovies("/api/movies/trending"),
-          fetchMovies("/api/movies/popular"),
-          fetchMovies("/api/movies/new"),
+          fetchMovies("action"),
+          fetchMovies("marvel"),
+          fetchMovies("new"),
         ])
 
         console.log("[v0] Trending movies:", trending.length)
