@@ -4,32 +4,32 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Updated theme to dark streaming platform with red accent */
-  --background: #0f0f0f;
+  /* Netflix-inspired dark streaming platform */
+  --background: #141414;
   --foreground: #ffffff;
-  --card: #1a1a1a;
+  --card: #1f1f1f;
   --card-foreground: #ffffff;
-  --popover: #1a1a1a;
+  --popover: #2a2a2a;
   --popover-foreground: #ffffff;
   --primary: #e50914;
   --primary-foreground: #ffffff;
   --secondary: #221f1f;
   --secondary-foreground: #ffffff;
-  --muted: #564d4d;
+  --muted: #808080;
   --muted-foreground: #b3b3b3;
   --accent: #e50914;
   --accent-foreground: #ffffff;
   --destructive: #e50914;
   --destructive-foreground: #ffffff;
   --border: #333333;
-  --input: #333333;
+  --input: #3a3a3a;
   --ring: #e50914;
   --chart-1: #e50914;
   --chart-2: #221f1f;
   --chart-3: #564d4d;
   --chart-4: #831010;
   --chart-5: #ff6b6b;
-  --radius: 0.5rem;
+  --radius: 0.375rem;
   --sidebar: #0f0f0f;
   --sidebar-foreground: #ffffff;
   --sidebar-primary: #e50914;
@@ -41,24 +41,24 @@
 }
 
 .dark {
-  --background: #0f0f0f;
+  --background: #141414;
   --foreground: #ffffff;
-  --card: #1a1a1a;
+  --card: #1f1f1f;
   --card-foreground: #ffffff;
-  --popover: #1a1a1a;
+  --popover: #2a2a2a;
   --popover-foreground: #ffffff;
   --primary: #e50914;
   --primary-foreground: #ffffff;
   --secondary: #221f1f;
   --secondary-foreground: #ffffff;
-  --muted: #564d4d;
+  --muted: #808080;
   --muted-foreground: #b3b3b3;
   --accent: #e50914;
   --accent-foreground: #ffffff;
   --destructive: #e50914;
   --destructive-foreground: #ffffff;
   --border: #333333;
-  --input: #333333;
+  --input: #3a3a3a;
   --ring: #e50914;
   --chart-1: #e50914;
   --chart-2: #221f1f;
@@ -76,8 +76,8 @@
 }
 
 @theme inline {
-  --font-sans: "Geist", "Geist Fallback";
-  --font-mono: "Geist Mono", "Geist Mono Fallback";
+  --font-sans: "Geist", "Geist Fallback", system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono", "Geist Mono Fallback", monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -123,23 +123,47 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Netflix-inspired typography scaling */
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl font-black tracking-tight;
+  }
+
+  h2 {
+    @apply text-2xl md:text-3xl font-bold;
+  }
+
+  h3 {
+    @apply text-lg md:text-xl font-semibold;
+  }
 }
 
-/* Added custom scrollbar styling for movie grid */
+/* Netflix-style scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #1a1a1a;
+  background: #0f0f0f;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #564d4d;
-  border-radius: 5px;
+  background: #565656;
+  border-radius: 6px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #e50914;
+}
+
+/* Smooth transitions and animations */
+@layer utilities {
+  .smooth-scale {
+    @apply transition-transform duration-200;
+  }
+
+  .hover-lift {
+    @apply hover:scale-105 hover:shadow-2xl;
+  }
 }

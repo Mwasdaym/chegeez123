@@ -10,49 +10,51 @@ interface HeroBannerProps {
 
 export default function HeroBanner({ movie }: HeroBannerProps) {
   return (
-    <div className="relative h-96 md:h-screen overflow-hidden bg-gradient-to-b from-black/50 to-background">
-      {/* Background Image */}
+    <div className="relative h-96 md:h-[70vh] overflow-hidden bg-black">
       {movie.cover?.url && (
         <div className="absolute inset-0 z-0">
-          <Image src={movie.cover.url || "/placeholder.svg"} alt={movie.title} fill className="object-cover" priority />
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/50 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+          <Image
+            src={movie.cover.url || "/placeholder.svg"}
+            alt={movie.title}
+            fill
+            className="object-cover brightness-75"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
         </div>
       )}
 
       {/* Content */}
-      <div className="relative z-10 h-full flex items-end px-4 md:px-8 pb-20">
-        <div className="max-w-2xl space-y-4">
-          <h1 className="text-4xl md:text-6xl font-bold text-foreground">{movie.title}</h1>
+      <div className="relative z-10 h-full flex items-center md:items-end px-6 md:px-12 pb-12 md:pb-16">
+        <div className="max-w-2xl space-y-6">
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-foreground leading-tight">{movie.title}</h1>
 
-          <div className="flex items-center gap-4 text-sm md:text-base">
+          <div className="flex flex-wrap items-center gap-4 text-sm md:text-base text-foreground/80">
             {movie.imdbRatingValue && (
-              <div className="flex items-center gap-1">
-                <span className="text-accent">★</span>
-                <span>{movie.imdbRatingValue}</span>
+              <div className="flex items-center gap-2 bg-black/50 px-3 py-1 rounded">
+                <span className="text-accent text-lg">★</span>
+                <span className="font-bold">{movie.imdbRatingValue}</span>
               </div>
             )}
-            {movie.releaseDate && (
-              <span className="text-muted-foreground">{new Date(movie.releaseDate).getFullYear()}</span>
-            )}
-            {movie.duration && <span className="text-muted-foreground">{Math.floor(movie.duration / 60)}m</span>}
-            {movie.genre && <span className="text-muted-foreground">{movie.genre.split(",")[0]}</span>}
+            {movie.releaseDate && <span className="font-medium">{new Date(movie.releaseDate).getFullYear()}</span>}
+            {movie.duration && <span className="font-medium">{Math.floor(movie.duration / 60)}m</span>}
+            {movie.genre && <span className="font-medium">{movie.genre.split(",")[0]}</span>}
           </div>
 
-          <p className="text-foreground/80 max-w-lg line-clamp-2">
+          <p className="text-foreground/90 text-base md:text-lg max-w-lg line-clamp-3 leading-relaxed">
             {movie.description || "Watch this amazing movie now"}
           </p>
 
-          {/* CTA Buttons */}
-          <div className="flex gap-4 pt-4">
+          <div className="flex gap-4 pt-6">
             <Link href={`/movie/${movie.subjectId}`}>
-              <button className="flex items-center gap-2 bg-accent text-accent-foreground px-6 py-3 rounded-lg font-bold hover:bg-accent/90 transition">
-                <Play className="w-5 h-5" />
+              <button className="flex items-center gap-3 bg-accent hover:bg-accent/90 text-accent-foreground px-8 py-3 rounded font-bold text-base transition duration-200 transform hover:scale-105">
+                <Play className="w-6 h-6" fill="currentColor" />
                 Play
               </button>
             </Link>
             <Link href={`/movie/${movie.subjectId}`}>
-              <button className="flex items-center gap-2 bg-card border border-border text-foreground px-6 py-3 rounded-lg font-bold hover:bg-card/80 transition">
+              <button className="flex items-center gap-3 bg-white/20 hover:bg-white/30 text-foreground px-8 py-3 rounded font-bold text-base transition duration-200 backdrop-blur-sm">
                 <Info className="w-5 h-5" />
                 More Info
               </button>
