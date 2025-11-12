@@ -18,12 +18,6 @@ interface MovieSource {
   format: string
 }
 
-interface StreamServer {
-  id: string
-  name: string
-  url: string
-}
-
 export default function MovieDetailPage() {
   const params = useParams()
   const id = params.id as string
@@ -33,18 +27,10 @@ export default function MovieDetailPage() {
   const [loading, setLoading] = useState(true)
   const [selectedQuality, setSelectedQuality] = useState("720p")
   const [selectedLanguage, setSelectedLanguage] = useState("en")
-  const [selectedServer, setSelectedServer] = useState<StreamServer | null>(null)
   const [isFavorite, setIsFavorite] = useState(false)
   const [showEpisodes, setShowEpisodes] = useState(false)
   const [showTrailer, setShowTrailer] = useState(false)
   const [showPlayer, setShowPlayer] = useState(false)
-
-  const streamServers: StreamServer[] = [
-    { id: "server1", name: "Server 1", url: "https://stream1.example.com" },
-    { id: "server2", name: "Server 2", url: "https://stream2.example.com" },
-    { id: "server3", name: "Server 3", url: "https://stream3.example.com" },
-    { id: "server4", name: "Server 4", url: "https://stream4.example.com" },
-  ]
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
@@ -70,7 +56,7 @@ export default function MovieDetailPage() {
           }))
           setSources(parsedSources)
 
-          const quality720p = parsedSources.find((s: MovieSource) => s.quality === "720p")
+          const quality720p = parsedSources.find((s: any) => s.quality === "720p")
           if (quality720p) {
             setSelectedQuality("720p")
           } else if (parsedSources.length > 0) {
@@ -84,12 +70,8 @@ export default function MovieDetailPage() {
       }
     }
 
-    if (!selectedServer && streamServers.length > 0) {
-      setSelectedServer(streamServers[0])
-    }
-
     fetchMovieDetails()
-  }, [id, selectedServer])
+  }, [id])
 
   const handleAddToWatchlist = () => {
     const watchlist = JSON.parse(localStorage.getItem("watchlist") || "[]")
@@ -245,26 +227,6 @@ export default function MovieDetailPage() {
               <h2 className="text-2xl font-bold text-foreground">Watch Now</h2>
 
               <div className="space-y-4">
-                {/* Stream Server Selection */}
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-foreground">Select Stream Server</label>
-                  <div className="flex flex-wrap gap-2">
-                    {streamServers.map((server) => (
-                      <button
-                        key={server.id}
-                        onClick={() => setSelectedServer(server)}
-                        className={`px-4 py-2 rounded-lg font-semibold transition ${
-                          selectedServer?.id === server.id
-                            ? "bg-accent text-accent-foreground"
-                            : "bg-background hover:bg-background/80 text-foreground border border-border"
-                        }`}
-                      >
-                        {server.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Quality Selection */}
                 {qualityOptions.length > 0 && (
                   <div className="space-y-2">
@@ -337,7 +299,8 @@ export default function MovieDetailPage() {
             <div className="space-y-3">
               <button
                 onClick={() => setShowPlayer(true)}
-                className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition"
+                disabled={!selectedSource}
+                className="w-full bg-accent hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed text-accent-foreground font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition"
               >
                 <Play className="w-5 h-5" fill="currentColor" />
                 Watch Now
