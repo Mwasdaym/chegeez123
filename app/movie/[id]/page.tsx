@@ -31,6 +31,7 @@ export default function MovieDetailPage() {
   const [isFavorite, setIsFavorite] = useState(false)
   const [showEpisodes, setShowEpisodes] = useState(false)
   const [showTrailer, setShowTrailer] = useState(false)
+  const [showPlayer, setShowPlayer] = useState(false)
 
   const streamServers: StreamServer[] = [
     { id: "server1", name: "Server 1", url: "https://stream1.example.com" },
@@ -126,6 +127,39 @@ export default function MovieDetailPage() {
         movieTitle={movie?.title || "Movie"}
         movieId={movie?.subjectId || ""}
       />
+
+      {showPlayer && (
+        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4">
+          <div className="w-full max-w-4xl">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-foreground">{movie.title}</h2>
+              <button
+                onClick={() => setShowPlayer(false)}
+                className="text-3xl text-foreground hover:text-accent transition"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="relative bg-black rounded-lg overflow-hidden aspect-video flex items-center justify-center">
+              <div className="text-center space-y-4">
+                <p className="text-lg text-foreground">Now Playing: {selectedServer?.name}</p>
+                <p className="text-sm text-muted-foreground">Quality: {selectedQuality}</p>
+                <p className="text-sm text-muted-foreground">Language: {selectedLanguage}</p>
+                <div className="pt-4">
+                  <a
+                    href={selectedSource?.download_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block bg-accent hover:bg-accent/90 text-accent-foreground px-6 py-3 rounded-lg font-bold transition"
+                  >
+                    Open Stream
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Navigation />
 
@@ -280,7 +314,10 @@ export default function MovieDetailPage() {
             )}
 
             <div className="space-y-3">
-              <button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition">
+              <button
+                onClick={() => setShowPlayer(true)}
+                className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition"
+              >
                 <Play className="w-5 h-5" fill="currentColor" />
                 Watch Now
               </button>
