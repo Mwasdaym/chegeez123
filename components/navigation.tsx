@@ -29,6 +29,12 @@ export default function Navigation() {
             <Link href="/watchlist" className="text-foreground hover:text-accent transition">
               My Watchlist
             </Link>
+            <Link
+              href="/login"
+              className="text-xs px-3 py-1 rounded bg-secondary hover:bg-primary/20 text-muted-foreground hover:text-accent transition"
+            >
+              Admin
+            </Link>
           </div>
 
           {/* Search Bar */}
@@ -56,6 +62,9 @@ export default function Navigation() {
             </Link>
             <Link href="/watchlist" className="block text-foreground hover:text-accent py-2">
               My Watchlist
+            </Link>
+            <Link href="/login" className="block text-foreground hover:text-accent py-2 text-sm">
+              Admin
             </Link>
             <div className="pt-2">
               <SearchBar />
