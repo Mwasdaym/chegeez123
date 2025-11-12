@@ -8,7 +8,7 @@ import { Spinner } from "@/components/spinner"
 import StreamSelector from "@/components/stream-selector"
 import QualitySelector from "@/components/quality-selector"
 import TranslationSelector from "@/components/translation-selector"
-import { Download, Share2, Heart } from "lucide-react"
+import { Download, Share2, Heart, Play, List } from "lucide-react"
 import Image from "next/image"
 
 interface StreamServer {
@@ -28,6 +28,7 @@ export default function MovieDetailPage() {
   const [selectedLanguage, setSelectedLanguage] = useState("en")
   const [selectedServer, setSelectedServer] = useState<StreamServer | null>(null)
   const [isFavorite, setIsFavorite] = useState(false)
+  const [showEpisodes, setShowEpisodes] = useState(false)
 
   const streamServers: StreamServer[] = [
     { id: "server1", name: "Server 1", url: "https://stream1.example.com" },
@@ -264,30 +265,63 @@ export default function MovieDetailPage() {
           <div className="space-y-6">
             {/* Poster */}
             {movie.cover?.url && (
-              <div className="relative aspect-video rounded-lg overflow-hidden">
+              <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-lg">
                 <Image src={movie.cover.url || "/placeholder.svg"} alt={movie.title} fill className="object-cover" />
               </div>
             )}
 
-            {/* Action Buttons */}
-            <div className="flex gap-2">
-              <button
-                onClick={handleAddToWatchlist}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-bold transition ${
-                  isFavorite ? "bg-accent text-accent-foreground" : "bg-card text-foreground hover:bg-card/80"
-                }`}
-              >
-                <Heart className={`w-5 h-5 ${isFavorite ? "fill-current" : ""}`} />
-                Watchlist
+            <div className="space-y-3">
+              <button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition">
+                <Play className="w-5 h-5" fill="currentColor" />
+                Watch Now
               </button>
-              <button className="flex items-center justify-center gap-2 px-4 py-2 bg-card text-foreground rounded-lg font-bold hover:bg-card/80 transition">
-                <Share2 className="w-5 h-5" />
+              <button
+                onClick={() => setShowEpisodes(!showEpisodes)}
+                className="w-full bg-card hover:bg-card/80 text-foreground font-bold py-3 px-4 rounded-lg border border-border flex items-center justify-center gap-2 transition"
+              >
+                <List className="w-5 h-5" />
+                Episodes
               </button>
             </div>
 
+            {/* Episodes Section */}
+            {showEpisodes && (
+              <div className="bg-card p-4 rounded-lg border border-border space-y-3 max-h-96 overflow-y-auto">
+                <h3 className="font-bold text-foreground text-lg">Episodes</h3>
+                <div className="space-y-2">
+                  {[1, 2, 3, 4, 5].map((ep) => (
+                    <button
+                      key={ep}
+                      className="w-full text-left p-3 bg-background hover:bg-background/80 rounded-lg transition border border-border text-sm text-foreground hover:text-accent"
+                    >
+                      Episode {ep}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Watchlist Button */}
+            <button
+              onClick={handleAddToWatchlist}
+              className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-bold transition ${
+                isFavorite
+                  ? "bg-accent text-accent-foreground"
+                  : "bg-card text-foreground hover:bg-card/80 border border-border"
+              }`}
+            >
+              <Heart className={`w-5 h-5 ${isFavorite ? "fill-current" : ""}`} />
+              Watchlist
+            </button>
+
+            <button className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-card text-foreground rounded-lg font-bold hover:bg-card/80 transition border border-border">
+              <Share2 className="w-5 h-5" />
+              Share
+            </button>
+
             {/* Additional Info */}
             {movie.subtitles && (
-              <div className="bg-card p-4 rounded-lg space-y-2">
+              <div className="bg-card p-4 rounded-lg space-y-2 border border-border">
                 <h3 className="font-bold text-foreground">Subtitles</h3>
                 <p className="text-sm text-foreground/80">{movie.subtitles}</p>
               </div>
