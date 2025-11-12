@@ -17,10 +17,16 @@ export default function MovieCard({ movie }: MovieCardProps) {
 
   // Support both TMDB and Movie API structures
   const movieId = movie.id || movie.subjectId
-  const posterUrl = movie.poster_path ? getTMDBImageUrl(movie.poster_path) : movie.cover?.url || "/placeholder.svg"
+  const posterUrl = movie.poster_path
+    ? getTMDBImageUrl(movie.poster_path, "w500")
+    : movie.cover?.url || "/abstract-movie-poster.png"
   const title = movie.title
   const rating = movie.vote_average || movie.imdbRatingValue
   const releaseDate = movie.release_date || movie.releaseDate
+
+  if (movie.poster_path) {
+    console.log("[v0] Movie:", title, "Poster URL:", posterUrl)
+  }
 
   return (
     <>
@@ -33,11 +39,13 @@ export default function MovieCard({ movie }: MovieCardProps) {
       >
         <div className="relative aspect-[2/3] bg-card overflow-hidden shadow-lg hover:shadow-2xl transition-shadow">
           <Image
-            src={posterUrl || "/placeholder.svg"}
+            src={posterUrl || "/placeholder.svg?height=450&width=300&query=movie+poster"}
             alt={title}
             fill
             className="object-cover brightness-90 group-hover:brightness-100 transition duration-200"
             sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
+            unoptimized={true}
+            onError={() => console.log("[v0] Image failed to load:", posterUrl)}
           />
 
           {hovered && (
