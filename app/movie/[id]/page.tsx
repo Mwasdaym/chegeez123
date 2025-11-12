@@ -65,22 +65,20 @@ export default function MovieDetailPage() {
             }
           })
 
-          console.log(
-            "[v0] Available sources:",
-            parsedSources.map((s) => ({ quality: s.quality, url: s.download_url.substring(0, 60) })),
-          )
+          console.log("[v0] Available sources:", parsedSources.length)
           setSources(parsedSources)
 
-          const quality720p = parsedSources.find((s: any) => s.quality === "720p")
-          const quality480p = parsedSources.find((s: any) => s.quality === "480p")
-          const anyQuality = parsedSources.length > 0 ? parsedSources[0] : null
+          if (parsedSources.length > 0) {
+            const quality720p = parsedSources.find((s: any) => s.quality === "720p")
+            const quality480p = parsedSources.find((s: any) => s.quality === "480p")
 
-          if (quality720p) {
-            setSelectedQuality("720p")
-          } else if (quality480p) {
-            setSelectedQuality("480p")
-          } else if (anyQuality) {
-            setSelectedQuality(anyQuality.quality)
+            if (quality720p) {
+              setSelectedQuality("720p")
+            } else if (quality480p) {
+              setSelectedQuality("480p")
+            } else {
+              setSelectedQuality(parsedSources[0].quality)
+            }
           }
         }
       } catch (error) {
@@ -129,7 +127,7 @@ export default function MovieDetailPage() {
     )
   }
 
-  const selectedSource = sources.find((s) => s.quality === selectedQuality)
+  const selectedSource = sources.find((s) => s.quality === selectedQuality) || sources[0]
   const qualityOptions = sources.map((s) => ({
     quality: s.quality,
     size: s.size ? `${(Number.parseInt(s.size) / 1024 / 1024 / 1024).toFixed(2)} GB` : "Unknown",
@@ -246,50 +244,56 @@ export default function MovieDetailPage() {
             <div className="space-y-6 bg-card p-6 rounded-lg border border-border">
               <h2 className="text-2xl font-bold text-foreground">Watch Now</h2>
 
-              <div className="space-y-4">
-                {/* Quality Selection */}
-                {qualityOptions.length > 0 && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-foreground">Video Quality</label>
-                    <div className="flex flex-wrap gap-2">
-                      {qualityOptions.map((option) => (
-                        <button
-                          key={option.quality}
-                          onClick={() => setSelectedQuality(option.quality)}
-                          className={`px-4 py-2 rounded-lg font-semibold transition ${
-                            selectedQuality === option.quality
-                              ? "bg-accent text-accent-foreground"
-                              : "bg-background hover:bg-background/80 text-foreground border border-border"
-                          }`}
-                        >
-                          {option.quality}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Language/Translation Selection */}
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-foreground">Audio Language</label>
-                  <select
-                    value={selectedLanguage}
-                    onChange={(e) => setSelectedLanguage(e.target.value)}
-                    className="w-full px-4 py-2 bg-background text-foreground rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-accent"
-                  >
-                    <option value="en">English</option>
-                    <option value="es">Spanish</option>
-                    <option value="fr">French</option>
-                    <option value="de">German</option>
-                    <option value="ja">Japanese</option>
-                    <option value="ko">Korean</option>
-                    <option value="zh">Chinese</option>
-                    <option value="ar">Arabic</option>
-                    <option value="pt">Portuguese</option>
-                    <option value="ru">Russian</option>
-                  </select>
+              {sources.length === 0 ? (
+                <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                  <p className="text-yellow-400">No video sources available for this movie.</p>
                 </div>
-              </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Quality Selection */}
+                  {qualityOptions.length > 0 && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-foreground">Video Quality</label>
+                      <div className="flex flex-wrap gap-2">
+                        {qualityOptions.map((option) => (
+                          <button
+                            key={option.quality}
+                            onClick={() => setSelectedQuality(option.quality)}
+                            className={`px-4 py-2 rounded-lg font-semibold transition ${
+                              selectedQuality === option.quality
+                                ? "bg-accent text-accent-foreground"
+                                : "bg-background hover:bg-background/80 text-foreground border border-border"
+                            }`}
+                          >
+                            {option.quality}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Language/Translation Selection */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-foreground">Audio Language</label>
+                    <select
+                      value={selectedLanguage}
+                      onChange={(e) => setSelectedLanguage(e.target.value)}
+                      className="w-full px-4 py-2 bg-background text-foreground rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-accent"
+                    >
+                      <option value="en">English</option>
+                      <option value="es">Spanish</option>
+                      <option value="fr">French</option>
+                      <option value="de">German</option>
+                      <option value="ja">Japanese</option>
+                      <option value="ko">Korean</option>
+                      <option value="zh">Chinese</option>
+                      <option value="ar">Arabic</option>
+                      <option value="pt">Portuguese</option>
+                      <option value="ru">Russian</option>
+                    </select>
+                  </div>
+                </div>
+              )}
 
               {/* Download Button */}
               {selectedSource && (

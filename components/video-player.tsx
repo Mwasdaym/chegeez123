@@ -29,7 +29,6 @@ export default function VideoPlayer({ streamUrl, movieTitle, quality, language, 
   useEffect(() => {
     const fetchCaptions = async () => {
       try {
-        // Mock caption data - in production, fetch from your API
         const mockCaptions: Caption[] = [
           { startTime: 0, endTime: 3, text: "Welcome to the movie" },
           { startTime: 3, endTime: 6, text: "Enjoy the full experience" },
@@ -55,8 +54,8 @@ export default function VideoPlayer({ streamUrl, movieTitle, quality, language, 
     }
     const handleError = () => {
       setIsLoading(false)
-      console.log("[v0] Video error - Code:", video.error?.code, "Message:", video.error?.message)
-      setError("Failed to load video. The stream may be temporarily unavailable. Try another quality.")
+      console.log("[v0] Video error - Code:", video.error?.code)
+      setError("Unable to stream this video. The file may be unavailable or incompatible.")
     }
     const handleLoadedMetadata = () => {
       console.log("[v0] Video metadata loaded successfully")
@@ -73,19 +72,17 @@ export default function VideoPlayer({ streamUrl, movieTitle, quality, language, 
       video.removeEventListener("error", handleError)
       video.removeEventListener("loadedmetadata", handleLoadedMetadata)
     }
-  }, [selectedCaption, captions])
+  }, [])
 
   useEffect(() => {
     const video = videoRef.current
     if (!video || !streamUrl) return
 
-    console.log("[v0] Loading video URL:", streamUrl.substring(0, 80) + "...")
-
-    // Reset error when URL changes
+    console.log("[v0] Attempting to load video from:", streamUrl.substring(0, 100))
     setError(null)
     setIsLoading(true)
 
-    // Attempt to load the video
+    video.crossOrigin = "anonymous"
     video.src = streamUrl
     video.load()
   }, [streamUrl])
@@ -167,12 +164,19 @@ export default function VideoPlayer({ streamUrl, movieTitle, quality, language, 
             <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-20">
               <div className="text-center">
                 <p className="text-red-500 text-lg mb-4">{error}</p>
-                <p className="text-foreground text-sm">Try selecting a different quality or language</p>
+                <a
+                  href={streamUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-accent underline hover:text-accent/80"
+                >
+                  Download video instead
+                </a>
               </div>
             </div>
           )}
 
-          <video ref={videoRef} src={streamUrl} controls className="w-full h-full" crossOrigin="anonymous" />
+          <video ref={videoRef} controls className="w-full h-full" crossOrigin="anonymous" controlsList="nodownload" />
 
           {selectedCaption && currentCaption && (
             <div className="absolute bottom-20 left-0 right-0 flex justify-center px-4">
@@ -195,8 +199,7 @@ export default function VideoPlayer({ streamUrl, movieTitle, quality, language, 
 
         <div className="mt-4 p-4 bg-card rounded-lg border border-border">
           <p className="text-sm text-muted-foreground">
-            Streaming from:{" "}
-            <span className="text-foreground font-mono text-xs break-all">{streamUrl.substring(0, 60)}...</span>
+            If video fails to load, use the download button below to view the file directly.
           </p>
         </div>
       </div>
