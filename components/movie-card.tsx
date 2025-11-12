@@ -5,7 +5,6 @@ import Image from "next/image"
 import { Play, Film } from "lucide-react"
 import { useState } from "react"
 import TrailerModal from "./trailer-modal"
-import { getTMDBImageUrl } from "@/lib/tmdb"
 
 interface MovieCardProps {
   movie: any
@@ -16,14 +15,11 @@ export default function MovieCard({ movie }: MovieCardProps) {
   const [showTrailer, setShowTrailer] = useState(false)
   const [imageError, setImageError] = useState(false)
 
-  // Support both TMDB and Movie API structures
   const movieId = movie.id || movie.subjectId
-  const posterUrl = movie.poster_path
-    ? getTMDBImageUrl(movie.poster_path, "w500")
-    : movie.cover?.url || "/abstract-movie-poster.png"
+  const posterUrl = movie.cover?.url || "/abstract-movie-poster.png"
   const title = movie.title
-  const rating = movie.vote_average || movie.imdbRatingValue
-  const releaseDate = movie.release_date || movie.releaseDate
+  const rating = movie.imdbRatingValue
+  const releaseDate = movie.releaseDate
 
   return (
     <>
@@ -42,7 +38,6 @@ export default function MovieCard({ movie }: MovieCardProps) {
               fill
               className="object-cover brightness-90 group-hover:brightness-100 transition duration-200"
               sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
-              crossOrigin="anonymous"
               priority={false}
               onError={() => setImageError(true)}
             />

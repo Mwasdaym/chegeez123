@@ -3,15 +3,18 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Play, Info } from "lucide-react"
+import { useState } from "react"
 
 interface HeroBannerProps {
   movie: any
 }
 
 export default function HeroBanner({ movie }: HeroBannerProps) {
+  const [imageError, setImageError] = useState(false)
+
   return (
     <div className="relative h-96 md:h-[70vh] overflow-hidden bg-black">
-      {movie.cover?.url && (
+      {movie.cover?.url && !imageError && (
         <div className="absolute inset-0 z-0">
           <Image
             src={movie.cover.url || "/placeholder.svg"}
@@ -19,6 +22,7 @@ export default function HeroBanner({ movie }: HeroBannerProps) {
             fill
             className="object-cover brightness-75"
             priority
+            onError={() => setImageError(true)}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
